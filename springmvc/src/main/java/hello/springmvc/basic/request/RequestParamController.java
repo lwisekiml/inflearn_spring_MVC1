@@ -1,8 +1,10 @@
 package hello.springmvc.basic.request;
 
+import hello.springmvc.basic.HelloData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -116,6 +118,48 @@ public class RequestParamController {
 //    public String requestParamMap(@RequestParam MultiValueMap<String, Object> paramMap) { // username=[kim, Lee], age=null
 
         log.info("username={}, age={}", paramMap.get("username"), paramMap.get("age"));
+        return "ok";
+    }
+
+    /** http://localhost:8080/model-attribute-v1?username=hello&age=20
+     * @ModelAttribute 사용
+     * 참고: model.addAttribute(helloData) 코드도 함께 자동 적용됨, 뒤에 model을 설명할 때 자세히 설명
+     *
+     * HelloData 객체 생성
+     * 요청 파라미터의 이름으로 HelloData 객체의 프로퍼티 찾고, 해당 프로퍼티의 setter를 호출하여 파라미터의 값을 입력(바인딩)
+     * ex) 파라미터 이름이 username이면 setUsername() 메서드를 찾아 호출하면서 값을 입력
+     *
+     * 프로퍼티
+     * 객체에 getUsername(), setUsername() 메서드가 있으면, 이 객체는 username이라는 프로퍼티를 가지고 있다.
+     * username 프로퍼티 값을 변경하면 setUsername()이 호출되고, 조회하면 getUsername()이 호출
+     *
+     * http://localhost:8080/model-attribute-v1?username=hello&age=abc
+     * 바인딩 오류
+     * age=abc처럼 숫자가 들어가야 할 곳에 문자를 넣으면 BindException 발생
+     */
+    @ResponseBody
+    @RequestMapping("/model-attribute-v1")
+    public String modelAttributeV1(@ModelAttribute HelloData helloData) {
+//    public String modelAttributeV1(@RequestParam String username, @RequestParam int age) {
+//        HelloData data = new HelloData();
+//        data.setUsername(username);
+//        data.setAge(age);
+
+        log.info("username={}, age={}", helloData.getUsername(), helloData.getAge());
+        log.info("helloData={}", helloData); // helloData=HelloData(username=hello, age=20)
+        return "ok";
+    }
+
+    /**
+     * @ModelAttribute 생략 가능하며 생략시 다음과 같은 규칙을 적용
+     * String, int 같은 단순 타입 = @RequestParam
+     * argument resolver(HttpServletRequest 등) 로 지정해둔 타입 외 = @ModelAttribute
+     */
+    @ResponseBody
+    @RequestMapping("/model-attribute-v2")
+    public String modelAttributeV2(HelloData helloData) {
+        log.info("username={}, age={}", helloData.getUsername(),
+                helloData.getAge());
         return "ok";
     }
 }
