@@ -96,11 +96,31 @@ public class BasicItemController {
     /**
      * @ModelAttribute 자체 생략 가능
      * model.addAttribute(item) 자동 추가
+     *
+     * 상품 등록을 완료하고 웹 브라우저의 새로고침을 하면 상품이 중복 등록된다.
+     * 이유는 웹 브라우저의 새로고침은 마지막에 서버에 전송한 데이터를 다시 전송하기 때문이다.
      */
-    @PostMapping("/add")
+//    @PostMapping("/add")
     public String addItemV4(Item item) {
         itemRepository.save(item);
         return "basic/item";
+    }
+
+    /**
+     * PRG - Post/Redirect/Get
+     *
+     * 상품 저장 후에 뷰 템플릿으로 이동하는 것이 아니라, 상품 상세 화면으로 리다이렉트를 호출
+     * 웹 브라우저는 리다이렉트의 영향으로 상품 저장 후에 실제 상품 상세 화면으로 다시 이동한다.
+     * 따라서 마지막에 호출한 상품 상세 화면인 GET /items/{id} 가 된다.
+     *
+     * <주의>
+     * redirect에서 +item.getId() 처럼 URL에 변수를 더해서 사용하는 것은 URL 인코딩이 안되기 때문에 위험하다.
+     * RedirectAttributes를 사용하자
+     */
+    @PostMapping("/add")
+    public String addItemV5(Item item) {
+        itemRepository.save(item);
+        return "redirect:/basic/items/" + item.getId();
     }
 
     // 상품 수정 폼 컨트롤러
